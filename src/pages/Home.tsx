@@ -1,9 +1,11 @@
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { ArrowRight, ArrowLeft, FileText, QrCode, Award, Clock, Search, Sparkles, BookOpen, Users, Building2, Trophy } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { ArrowRight, ArrowLeft, FileText, QrCode, Award, Clock, Search, Sparkles, BookOpen, Users, Building2, Trophy, Loader2 } from "lucide-react";
+import * as Icons from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MemberCard } from "@/components/MemberCard";
-import { facultyMembers, departments, facultyStats } from "@/data/mockData";
+import { fetchActiveMembers, fetchDepartments, fetchPlatformStats } from "@/lib/api";
 import heroImg from "@/assets/hero-academic.jpg";
 
 const Home = () => {
@@ -11,13 +13,18 @@ const Home = () => {
   const isAr = i18n.language === "ar";
   const Arrow = isAr ? ArrowLeft : ArrowRight;
 
-  const featuredMembers = facultyMembers.slice(0, 3);
+  const { data: stats } = useQuery({ queryKey: ["stats"], queryFn: fetchPlatformStats });
+  const { data: depts = [] } = useQuery({ queryKey: ["departments"], queryFn: fetchDepartments });
+  const { data: featured = [], isLoading: loadingFeatured } = useQuery({
+    queryKey: ["members", "featured"],
+    queryFn: () => fetchActiveMembers({ limit: 6 }),
+  });
 
-  const stats = [
-    { value: facultyStats.members, label: t("stats.members"), icon: Users },
-    { value: facultyStats.publications, label: t("stats.publications"), icon: BookOpen },
-    { value: facultyStats.departments, label: t("stats.departments"), icon: Building2 },
-    { value: facultyStats.awards, label: t("stats.awards"), icon: Trophy },
+  const statsArr = [
+    { value: stats?.members ?? 0, label: t("stats.members"), icon: Users },
+    { value: stats?.publications ?? 0, label: t("stats.publications"), icon: BookOpen },
+    { value: stats?.departments ?? 0, label: t("stats.departments"), icon: Building2 },
+    { value: stats?.awards ?? 0, label: t("stats.awards"), icon: Trophy },
   ];
 
   const features = [
@@ -71,7 +78,6 @@ const Home = () => {
           </div>
         </div>
 
-        {/* wave divider */}
         <div className="relative">
           <svg viewBox="0 0 1440 80" className="w-full h-12 fill-background block" preserveAspectRatio="none" aria-hidden>
             <path d="M0,40 C320,80 720,0 1440,40 L1440,80 L0,80 Z" />
@@ -82,13 +88,13 @@ const Home = () => {
       {/* STATS */}
       <section className="container-academic -mt-8 relative z-10">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {stats.map((s) => (
+          {statsArr.map((s) => (
             <div key={s.label} className="card-elegant p-5 text-center animate-scale-in">
               <div className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-accent-soft mb-3">
                 <s.icon className="h-5 w-5 text-accent" />
               </div>
               <div className="text-2xl md:text-3xl font-extrabold text-gradient-primary">
-                {s.value.toLocaleString(isAr ? "ar-EG" : "en-US")}+
+                {s.value.toLocaleString(isAr ? "ar-EG" : "en-US")}
               </div>
               <div className="text-xs md:text-sm text-muted-foreground mt-1">{s.label}</div>
             </div>
@@ -100,25 +106,25 @@ const Home = () => {
       <section className="container-academic py-20">
         <SectionHeader title={t("sections.departmentsTitle")} subtitle={t("sections.departmentsSubtitle")} />
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {departments.map((d) => (
-            <Link
-              key={d.key}
-              to={`/departments/${d.key}`}
-              className="card-elegant group p-6 hover:border-accent/50"
-            >
-              <div className={`flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br ${d.color} mb-4`}>
-                <Building2 className="h-6 w-6 text-primary" />
-              </div>
-              <h3 className="font-bold text-lg mb-1.5">{t(`departments.${d.key}`)}</h3>
-              <p className="text-sm text-muted-foreground">
-                {t("departments.membersCount", { count: facultyMembers.filter(m => m.department === d.key).length })}
-              </p>
-              <div className="flex items-center gap-1.5 mt-4 text-sm font-medium text-accent">
-                {t("common.viewAll")}
-                <Arrow className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1 rtl:group-hover:-translate-x-1" />
-              </div>
-            </Link>
-          ))}
+          {depts.map((d) => {
+            const Icon = (Icons as any)[d.icon ?? "Building2"] ?? Building2;
+            return (
+              <Link
+                key={d.id}
+                to={`/departments/${d.key}`}
+                className="card-elegant group p-6 hover:border-accent/50"
+              >
+                <div className={`flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br ${d.color_class} mb-4`}>
+                  <Icon className="h-6 w-6 text-primary" />
+                </div>
+                <h3 className="font-bold text-lg mb-1.5">{isAr ? d.name_ar : d.name_en}</h3>
+                <div className="flex items-center gap-1.5 mt-4 text-sm font-medium text-accent">
+                  {t("common.viewAll")}
+                  <Arrow className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1 rtl:group-hover:-translate-x-1" />
+                </div>
+              </Link>
+            );
+          })}
         </div>
       </section>
 
@@ -143,11 +149,18 @@ const Home = () => {
       {/* FEATURED MEMBERS */}
       <section className="container-academic py-20">
         <SectionHeader title={t("sections.featuredTitle")} subtitle={t("sections.featuredSubtitle")} />
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {featuredMembers.map((m) => (
-            <MemberCard key={m.id} member={m} />
-          ))}
-        </div>
+        {loadingFeatured ? (
+          <div className="flex justify-center py-12"><Loader2 className="h-8 w-8 animate-spin text-accent" /></div>
+        ) : featured.length === 0 ? (
+          <div className="text-center text-muted-foreground py-12 card-elegant">
+            <p className="mb-2">لا يوجد أعضاء هيئة تدريس مسجلين بعد.</p>
+            <p className="text-sm">سيتم عرضهم هنا بمجرد إضافتهم من لوحة الإدارة.</p>
+          </div>
+        ) : (
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {featured.slice(0, 3).map((m) => <MemberCard key={m.id} member={m} />)}
+          </div>
+        )}
         <div className="text-center mt-10">
           <Button asChild size="lg" variant="outline" className="gap-2">
             <Link to="/search">

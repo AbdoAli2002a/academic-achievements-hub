@@ -1,29 +1,32 @@
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Search as SearchIcon } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { Search as SearchIcon, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { MemberCard } from "@/components/MemberCard";
-import { facultyMembers, departments } from "@/data/mockData";
+import { fetchActiveMembers, fetchDepartments } from "@/lib/api";
 
 const ranks = ["professor", "associate", "lecturer", "assistant"] as const;
 
 const Search = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isAr = i18n.language === "ar";
   const [q, setQ] = useState("");
-  const [dept, setDept] = useState<string>("all");
+  const [deptId, setDeptId] = useState<string>("all");
   const [rank, setRank] = useState<string>("all");
 
-  const filtered = useMemo(() => {
-    const query = q.trim().toLowerCase();
-    return facultyMembers.filter((m) => {
-      if (dept !== "all" && m.department !== dept) return false;
-      if (rank !== "all" && m.rank !== rank) return false;
-      if (!query) return true;
-      return [m.nameAr, m.nameEn, m.specialtyAr, m.specialtyEn]
-        .some((s) => s.toLowerCase().includes(query));
-    });
-  }, [q, dept, rank]);
+  const { data: depts = [] } = useQuery({ queryKey: ["departments"], queryFn: fetchDepartments });
+
+  const { data: members = [], isLoading } = useQuery({
+    queryKey: ["search", q, deptId, rank],
+    queryFn: () =>
+      fetchActiveMembers({
+        departmentId: deptId === "all" ? undefined : deptId,
+        rank: rank === "all" ? undefined : rank,
+        query: q,
+      }),
+  });
 
   return (
     <div className="container-academic py-12 md:py-16 animate-fade-in">
@@ -44,12 +47,12 @@ const Search = () => {
               className="ps-10 h-11"
             />
           </div>
-          <Select value={dept} onValueChange={setDept}>
-            <SelectTrigger className="h-11 md:w-[180px]"><SelectValue /></SelectTrigger>
+          <Select value={deptId} onValueChange={setDeptId}>
+            <SelectTrigger className="h-11 md:w-[200px]"><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">{t("search.allDepts")}</SelectItem>
-              {departments.map((d) => (
-                <SelectItem key={d.key} value={d.key}>{t(`departments.${d.key}`)}</SelectItem>
+              {depts.map((d) => (
+                <SelectItem key={d.id} value={d.id}>{isAr ? d.name_ar : d.name_en}</SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -64,15 +67,17 @@ const Search = () => {
           </Select>
         </div>
         <p className="mt-4 text-sm text-muted-foreground">
-          {t("search.results", { count: filtered.length })}
+          {isLoading ? t("common.loading") : t("search.results", { count: members.length })}
         </p>
       </div>
 
-      {filtered.length === 0 ? (
+      {isLoading ? (
+        <div className="flex justify-center py-16"><Loader2 className="h-8 w-8 animate-spin text-accent" /></div>
+      ) : members.length === 0 ? (
         <p className="text-center text-muted-foreground py-16">{t("search.noResults")}</p>
       ) : (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {filtered.map((m) => <MemberCard key={m.id} member={m} />)}
+          {members.map((m) => <MemberCard key={m.id} member={m} />)}
         </div>
       )}
     </div>

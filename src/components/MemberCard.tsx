@@ -1,20 +1,27 @@
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Mail, ArrowLeft, ArrowRight } from "lucide-react";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { BadgeIcon } from "./BadgeIcon";
-import type { FacultyMember } from "@/data/mockData";
+import type { MemberWithRelations } from "@/lib/api";
 
 interface Props {
-  member: FacultyMember;
+  member: MemberWithRelations;
 }
+
+const initialsFromName = (name: string | null | undefined) => {
+  if (!name) return "؟";
+  const words = name.trim().split(/\s+/);
+  return words.slice(0, 2).map((w) => w[0]).join("");
+};
 
 export const MemberCard = ({ member }: Props) => {
   const { t, i18n } = useTranslation();
   const isAr = i18n.language === "ar";
-  const name = isAr ? member.nameAr : member.nameEn;
-  const specialty = isAr ? member.specialtyAr : member.specialtyEn;
+  const name = isAr ? member.name_ar : (member.name_en || member.name_ar);
+  const specialty = isAr ? member.specialty_ar : (member.specialty_en || member.specialty_ar);
+  const deptName = member.department ? (isAr ? member.department.name_ar : member.department.name_en) : "";
   const Arrow = isAr ? ArrowLeft : ArrowRight;
 
   return (
@@ -23,33 +30,36 @@ export const MemberCard = ({ member }: Props) => {
 
       <div className="flex items-start gap-4 mb-4">
         <Avatar className="h-16 w-16 ring-2 ring-accent/20">
+          {member.avatar_url && <AvatarImage src={member.avatar_url} alt={name} />}
           <AvatarFallback className="bg-gradient-primary text-primary-foreground text-lg font-bold">
-            {member.initials}
+            {member.initials || initialsFromName(name)}
           </AvatarFallback>
         </Avatar>
         <div className="flex-1 min-w-0">
           <h3 className="font-bold text-lg leading-tight text-foreground line-clamp-1">{name}</h3>
-          <p className="text-xs text-accent font-medium mt-1">{t(`ranks.${member.rank}`)}</p>
-          <p className="text-xs text-muted-foreground mt-0.5">{t(`departments.${member.department}`)}</p>
+          {member.rank && <p className="text-xs text-accent font-medium mt-1">{t(`ranks.${member.rank}`)}</p>}
+          {deptName && <p className="text-xs text-muted-foreground mt-0.5">{deptName}</p>}
         </div>
       </div>
 
-      <p className="text-sm text-muted-foreground line-clamp-2 mb-4 min-h-[2.5rem]">
-        {specialty}
-      </p>
+      {specialty && (
+        <p className="text-sm text-muted-foreground line-clamp-2 mb-4 min-h-[2.5rem]">
+          {specialty}
+        </p>
+      )}
 
       {member.badges.length > 0 && (
         <div className="flex items-center gap-1.5 mb-4">
           {member.badges.slice(0, 3).map((b) => (
-            <BadgeIcon key={b} badge={b} size="sm" />
+            <BadgeIcon key={b.id} badgeKey={b.key} size="sm" />
           ))}
         </div>
       )}
 
       <div className="grid grid-cols-3 gap-2 mb-5 pt-4 border-t border-border">
-        <Stat value={member.publicationsCount} label={t("member.publications")} />
-        <Stat value={member.citationsCount} label={t("member.citations")} />
-        <Stat value={member.awardsCount} label={t("member.awards")} />
+        <Stat value={member.publications_count} label={t("member.publications")} />
+        <Stat value={member.awards_count} label={t("member.awards")} />
+        <Stat value={member.years_exp ?? 0} label={t("member.yearsExp")} />
       </div>
 
       <div className="flex items-center gap-2 mt-auto">
@@ -59,11 +69,13 @@ export const MemberCard = ({ member }: Props) => {
             <Arrow className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 rtl:group-hover:-translate-x-0.5" />
           </Link>
         </Button>
-        <Button asChild size="sm" variant="outline" aria-label="Email">
-          <a href={`mailto:${member.email}`}>
-            <Mail className="h-4 w-4" />
-          </a>
-        </Button>
+        {member.email && (
+          <Button asChild size="sm" variant="outline" aria-label="Email">
+            <a href={`mailto:${member.email}`}>
+              <Mail className="h-4 w-4" />
+            </a>
+          </Button>
+        )}
       </div>
     </article>
   );
