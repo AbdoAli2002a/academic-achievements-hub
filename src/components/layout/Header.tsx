@@ -1,14 +1,17 @@
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { GraduationCap, Menu, X, LogIn } from "lucide-react";
+import { GraduationCap, Menu, X, LogIn, LayoutDashboard, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
 
 export const Header = () => {
   const { t } = useTranslation();
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, signOut } = useAuth();
   const [open, setOpen] = useState(false);
 
   const links = [
@@ -19,6 +22,11 @@ export const Header = () => {
   ];
 
   const isActive = (to: string) => location.pathname === to;
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/");
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/60 bg-background/85 backdrop-blur-xl supports-[backdrop-filter]:bg-background/70">
@@ -52,12 +60,26 @@ export const Header = () => {
 
         <div className="flex items-center gap-2">
           <LanguageSwitcher />
-          <Button asChild size="sm" variant="default" className="hidden sm:inline-flex gap-2">
-            <Link to="/login">
-              <LogIn className="h-4 w-4" />
-              <span>{t("nav.login")}</span>
-            </Link>
-          </Button>
+          {user ? (
+            <>
+              <Button asChild size="sm" variant="default" className="hidden sm:inline-flex gap-2">
+                <Link to="/dashboard">
+                  <LayoutDashboard className="h-4 w-4" />
+                  <span>{t("nav.dashboard")}</span>
+                </Link>
+              </Button>
+              <Button onClick={handleSignOut} size="sm" variant="outline" className="hidden sm:inline-flex gap-2" aria-label="Sign out">
+                <LogOut className="h-4 w-4" />
+              </Button>
+            </>
+          ) : (
+            <Button asChild size="sm" variant="default" className="hidden sm:inline-flex gap-2">
+              <Link to="/login">
+                <LogIn className="h-4 w-4" />
+                <span>{t("nav.login")}</span>
+              </Link>
+            </Button>
+          )}
           <Button
             variant="ghost"
             size="icon"
@@ -88,13 +110,20 @@ export const Header = () => {
                 {l.label}
               </Link>
             ))}
-            <Link
-              to="/login"
-              onClick={() => setOpen(false)}
-              className="rounded-lg px-3 py-2.5 text-sm font-medium bg-primary text-primary-foreground text-center mt-2"
-            >
-              {t("nav.login")}
-            </Link>
+            {user ? (
+              <>
+                <Link to="/dashboard" onClick={() => setOpen(false)} className="rounded-lg px-3 py-2.5 text-sm font-medium bg-primary text-primary-foreground text-center mt-2">
+                  {t("nav.dashboard")}
+                </Link>
+                <button onClick={() => { setOpen(false); handleSignOut(); }} className="rounded-lg px-3 py-2.5 text-sm font-medium border border-border text-center">
+                  خروج
+                </button>
+              </>
+            ) : (
+              <Link to="/login" onClick={() => setOpen(false)} className="rounded-lg px-3 py-2.5 text-sm font-medium bg-primary text-primary-foreground text-center mt-2">
+                {t("nav.login")}
+              </Link>
+            )}
           </nav>
         </div>
       )}
