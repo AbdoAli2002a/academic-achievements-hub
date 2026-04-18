@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { GraduationCap, Menu, X, LogIn, LayoutDashboard, LogOut } from "lucide-react";
+import { GraduationCap, Menu, X, LogIn, LayoutDashboard, LogOut, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { useAuth } from "@/hooks/useAuth";
@@ -11,7 +11,8 @@ export const Header = () => {
   const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, signOut } = useAuth();
+  const { user, roles, signOut } = useAuth();
+  const isAdmin = roles.includes("super_admin");
   const [open, setOpen] = useState(false);
 
   const links = [
@@ -62,6 +63,14 @@ export const Header = () => {
           <LanguageSwitcher />
           {user ? (
             <>
+              {isAdmin && (
+                <Button asChild size="sm" variant="outline" className="hidden sm:inline-flex gap-2">
+                  <Link to="/admin">
+                    <ShieldCheck className="h-4 w-4" />
+                    <span>الإدارة</span>
+                  </Link>
+                </Button>
+              )}
               <Button asChild size="sm" variant="default" className="hidden sm:inline-flex gap-2">
                 <Link to="/dashboard">
                   <LayoutDashboard className="h-4 w-4" />
