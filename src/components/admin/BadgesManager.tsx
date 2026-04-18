@@ -129,14 +129,14 @@ export const BadgesManager = () => {
             {badges.map((b) => (
               <div key={b.id} className="flex items-center justify-between rounded-lg border border-border p-3">
                 <div className="flex items-center gap-3">
-                  <BadgeIcon icon={b.icon} color={b.color ?? "gold"} className="h-9 w-9" />
+                  <BadgeIcon badgeKey={b.key} badgeNameAr={b.name_ar} badgeNameEn={b.name_en} iconName={b.icon} size="sm" />
                   <div>
                     <div className="font-semibold text-sm">{b.name_ar}</div>
                     <div className="text-xs text-muted-foreground">{b.key}</div>
                   </div>
                 </div>
                 <Button size="icon" variant="ghost" onClick={() => delMut.mutate(b.id)}>
-                  <Trash2 className="h-4 w-4 text-red-500" />
+                  <Trash2 className="h-4 w-4 text-destructive" />
                 </Button>
               </div>
             ))}
@@ -189,9 +189,9 @@ export const BadgesManager = () => {
             <div className="flex flex-wrap gap-2">
               {memberBadges.map((mb: any) => (
                 <span key={mb.id} className="inline-flex items-center gap-2 rounded-full border border-border px-3 py-1 text-xs">
-                  <BadgeIcon icon={mb.badge?.icon ?? "Award"} color={mb.badge?.color ?? "gold"} className="h-5 w-5" />
+                  <BadgeIcon badgeKey={mb.badge?.key ?? ""} badgeNameAr={mb.badge?.name_ar} badgeNameEn={mb.badge?.name_en} iconName={mb.badge?.icon ?? "Award"} size="sm" />
                   {mb.badge?.name_ar}
-                  <button className="text-red-500" onClick={() => revokeMut.mutate(mb.id)} aria-label="revoke">
+                  <button className="text-destructive" onClick={() => revokeMut.mutate(mb.id)} aria-label="revoke">
                     <Trash2 className="h-3 w-3" />
                   </button>
                 </span>

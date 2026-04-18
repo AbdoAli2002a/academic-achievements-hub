@@ -77,7 +77,7 @@ const PendingList = ({ table }: { table: ContentTable }) => {
             <div className="flex gap-2">
               <Button
                 size="sm"
-                className="gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white"
+                className="gap-1.5"
                 onClick={() => mut.mutate({ id: item.id, status: "approved" })}
                 disabled={mut.isPending}
               >
@@ -86,7 +86,7 @@ const PendingList = ({ table }: { table: ContentTable }) => {
               <Button
                 size="sm"
                 variant="outline"
-                className="gap-1.5 text-red-600 border-red-200 hover:bg-red-50"
+                className="gap-1.5 text-destructive border-destructive/30 hover:bg-destructive/10"
                 onClick={() => {
                   const reason = prompt("سبب الرفض (اختياري)") ?? undefined;
                   mut.mutate({ id: item.id, status: "rejected", reason });
