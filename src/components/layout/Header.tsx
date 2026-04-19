@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { GraduationCap, Menu, X, LogIn, LayoutDashboard, LogOut, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { NotificationsBell } from "@/components/NotificationsBell";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
 
@@ -61,6 +62,7 @@ export const Header = () => {
 
         <div className="flex items-center gap-2">
           <LanguageSwitcher />
+          {user && <NotificationsBell />}
           {user ? (
             <>
               {isAdmin && (
