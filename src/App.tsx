@@ -11,6 +11,7 @@ import DepartmentDetail from "./pages/DepartmentDetail";
 import Search from "./pages/Search";
 import MemberProfile from "./pages/MemberProfile";
 import About from "./pages/About";
+import Leaderboard from "./pages/Leaderboard";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Admin from "./pages/Admin";
@@ -31,6 +32,7 @@ const App = () => (
             <Route path="/departments/:key" element={<DepartmentDetail />} />
             <Route path="/search" element={<Search />} />
             <Route path="/member/:id" element={<MemberProfile />} />
+            <Route path="/leaderboard" element={<Leaderboard />} />
             <Route path="/about" element={<About />} />
             <Route path="/login" element={<Login />} />
             <Route path="/dashboard" element={<Dashboard />} />
