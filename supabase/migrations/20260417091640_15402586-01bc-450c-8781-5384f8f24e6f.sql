@@ -377,7 +377,7 @@ CREATE POLICY "Only admins can grant badges"
 -- SEED DATA — departments + badges
 -- =========================================
 INSERT INTO public.departments (key, name_ar, name_en, icon, color_class, display_order) VALUES
-  ('artEd',     'التربية الفنية',       'Art Education',           'Palette',     'from-pink-500/10 to-rose-500/10',     1),
+  ('artEd',     'مناهج وطرق تدريس ',       'Art Education',           'Palette',     'from-pink-500/10 to-rose-500/10',     1),
   ('musicEd',   'التربية الموسيقية',    'Music Education',         'Music2',      'from-purple-500/10 to-indigo-500/10', 2),
   ('homeEc',    'الاقتصاد المنزلي',     'Home Economics',          'Home',        'from-amber-500/10 to-orange-500/10',  3),
   ('eduTech',   'تكنولوجيا التعليم',    'Educational Technology',  'MonitorPlay', 'from-blue-500/10 to-cyan-500/10',     4),
