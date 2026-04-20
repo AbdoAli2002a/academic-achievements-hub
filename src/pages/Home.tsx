@@ -5,6 +5,7 @@ import { ArrowRight, ArrowLeft, FileText, QrCode, Award, Clock, Search, Sparkles
 import * as Icons from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MemberCard } from "@/components/MemberCard";
+import { LeaderboardWidget } from "@/components/LeaderboardWidget";
 import { fetchActiveMembers, fetchDepartments, fetchPlatformStats } from "@/lib/api";
 import heroImg from "@/assets/hero-academic.jpg";
 
@@ -146,8 +147,13 @@ const Home = () => {
         </div>
       </section>
 
+      {/* LEADERBOARD WIDGET */}
+      <section className="container-academic py-16">
+        <LeaderboardWidget />
+      </section>
+
       {/* FEATURED MEMBERS */}
-      <section className="container-academic py-20">
+      <section className="container-academic pb-20">
         <SectionHeader title={t("sections.featuredTitle")} subtitle={t("sections.featuredSubtitle")} />
         {loadingFeatured ? (
           <div className="flex justify-center py-12"><Loader2 className="h-8 w-8 animate-spin text-accent" /></div>
