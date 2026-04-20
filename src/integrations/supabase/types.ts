@@ -436,6 +436,44 @@ export type Database = {
           },
         ]
       }
+      publication_reviews: {
+        Row: {
+          created_at: string
+          id: string
+          publication_id: string
+          rating: number
+          review_text: string | null
+          reviewer_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          publication_id: string
+          rating: number
+          review_text?: string | null
+          reviewer_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          publication_id?: string
+          rating?: number
+          review_text?: string | null
+          reviewer_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "publication_reviews_publication_id_fkey"
+            columns: ["publication_id"]
+            isOneToOne: false
+            referencedRelation: "publications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       publications: {
         Row: {
           abstract: string | null
