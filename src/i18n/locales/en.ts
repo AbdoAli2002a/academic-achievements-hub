@@ -29,6 +29,11 @@ const en: Translations = {
     others: "Other Contenders",
     empty: "No data to display yet",
   },
+  leaderboardWidget: {
+    title: "🏆 Hall of Fame",
+    subtitle: "Top performers this season",
+    viewFull: "View full board",
+  },
   hero: {
     badge: "Integrated Academic Platform",
     title: "Documenting Achievement,",
