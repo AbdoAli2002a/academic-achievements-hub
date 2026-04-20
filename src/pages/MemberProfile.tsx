@@ -1,12 +1,12 @@
 import { useParams, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, ArrowRight, Mail, Phone, FileText, QrCode, BookOpen, Award, Calendar, GraduationCap, Loader2, Globe, ExternalLink } from "lucide-react";
+import { ArrowLeft, ArrowRight, Mail, Phone, FileText, QrCode, BookOpen, Award, Calendar, GraduationCap, Loader2, Globe } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { BadgeIcon } from "@/components/BadgeIcon";
-import { PublicationReviews } from "@/components/PublicationReviews";
+import { PublicationsList } from "@/components/PublicationsList";
 import { fetchMemberFullProfile } from "@/lib/api";
 import { toast } from "sonner";
 
@@ -119,36 +119,7 @@ const MemberProfile = () => {
 
             {member.publications.length > 0 && (
               <Section title={t("member.publications")}>
-                <ul className="space-y-4">
-                  {member.publications.map((p) => {
-                    const title = isAr ? p.title_ar : (p.title_en || p.title_ar);
-                    return (
-                      <li key={p.id} className="rounded-lg border border-border/60 bg-card p-4">
-                        <div className="flex items-start justify-between gap-3 flex-wrap">
-                          <div className="flex-1 min-w-0">
-                            <p className="font-semibold text-foreground">{title}</p>
-                            <div className="flex flex-wrap gap-2 mt-1 text-xs text-muted-foreground">
-                              <span>{p.publication_year}</span>
-                              {p.journal_name && <span>· {p.journal_name}</span>}
-                              {p.type && <Badge variant="outline" className="text-[10px]">{t(`pub.${p.type}`, p.type)}</Badge>}
-                            </div>
-                            {p.abstract && (
-                              <p className="text-sm text-muted-foreground mt-2 line-clamp-3">{p.abstract}</p>
-                            )}
-                          </div>
-                          {p.url && (
-                            <Button asChild variant="ghost" size="sm" className="gap-1">
-                              <a href={p.url} target="_blank" rel="noopener noreferrer">
-                                <ExternalLink className="h-3.5 w-3.5" /> {t("member.openLink")}
-                              </a>
-                            </Button>
-                          )}
-                        </div>
-                        <PublicationReviews publicationId={p.id} publicationOwnerId={member.id} />
-                      </li>
-                    );
-                  })}
-                </ul>
+                <PublicationsList publications={member.publications} ownerId={member.id} />
               </Section>
             )}
 

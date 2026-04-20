@@ -113,6 +113,14 @@ const en: Translations = {
     thesis: "Thesis",
     other: "Other",
   },
+  pubFilter: {
+    newest: "Newest",
+    oldest: "Oldest",
+    topRated: "Top Rated",
+    mostCited: "Most Cited",
+    allTypes: "All Types",
+    noResults: "No publications match the filter",
+  },
   search: {
     title: "Advanced Search",
     placeholder: "Search by name, specialty, or department...",

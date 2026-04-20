@@ -111,6 +111,14 @@ const ar = {
     thesis: "رسالة",
     other: "أخرى",
   },
+  pubFilter: {
+    newest: "الأحدث",
+    oldest: "الأقدم",
+    topRated: "الأعلى تقييماً",
+    mostCited: "الأكثر استشهاداً",
+    allTypes: "كل الأنواع",
+    noResults: "لا توجد أبحاث مطابقة للفلتر",
+  },
   search: {
     title: "البحث المتقدم",
     placeholder: "ابحث بالاسم، التخصص، أو القسم...",
