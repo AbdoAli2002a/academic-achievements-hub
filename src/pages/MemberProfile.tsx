@@ -1,11 +1,12 @@
 import { useParams, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, ArrowRight, Mail, Phone, FileText, QrCode, BookOpen, Award, Calendar, GraduationCap, Loader2, Globe } from "lucide-react";
+import { ArrowLeft, ArrowRight, Mail, Phone, FileText, QrCode, BookOpen, Award, Calendar, GraduationCap, Loader2, Globe, ExternalLink } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { BadgeIcon } from "@/components/BadgeIcon";
+import { PublicationReviews } from "@/components/PublicationReviews";
 import { fetchMemberFullProfile } from "@/lib/api";
 import { toast } from "sonner";
 
