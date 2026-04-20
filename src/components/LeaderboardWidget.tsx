@@ -65,15 +65,33 @@ export const LeaderboardWidget = () => {
                 : entry.department.name_en
               : null;
 
+            const isPodium = i < 3;
+            // Stagger: podium first (slower & more pronounced), then the rest
+            const delay = isPodium ? i * 180 : 540 + (i - 3) * 90;
             return (
-              <li key={entry.id}>
+              <li
+                key={entry.id}
+                className="opacity-0 animate-fade-in"
+                style={{
+                  animationDelay: `${delay}ms`,
+                  animationDuration: isPodium ? "600ms" : "400ms",
+                  animationFillMode: "forwards",
+                }}
+              >
                 <Link
                   to={`/member/${entry.id}`}
-                  className="group flex items-center gap-3 p-3 rounded-lg hover:bg-accent-soft/50 transition-colors"
+                  className={`group flex items-center gap-3 p-3 rounded-lg transition-all hover:bg-accent-soft/50 hover:scale-[1.02] ${
+                    isPodium ? "bg-gradient-to-r from-gold/5 to-transparent border border-gold/15" : ""
+                  }`}
                 >
                   <div className="flex items-center justify-center w-8 shrink-0">
                     {Icon ? (
-                      <Icon className={`h-5 w-5 ${RANK_COLOR[i]}`} />
+                      <Icon
+                        className={`h-5 w-5 ${RANK_COLOR[i]} ${
+                          i === 0 ? "animate-[scale-in_0.5s_ease-out] drop-shadow-[0_0_8px_hsl(var(--gold)/0.6)]" : ""
+                        }`}
+                        style={{ animationDelay: `${delay + 200}ms`, animationFillMode: "backwards" }}
+                      />
                     ) : (
                       <span className="text-sm font-bold text-muted-foreground">
                         #{i + 1}
@@ -81,7 +99,11 @@ export const LeaderboardWidget = () => {
                     )}
                   </div>
 
-                  <Avatar className="h-10 w-10 shrink-0 ring-2 ring-background">
+                  <Avatar
+                    className={`shrink-0 ring-2 ring-background transition-transform ${
+                      isPodium ? "h-12 w-12 ring-gold/30" : "h-10 w-10"
+                    }`}
+                  >
                     {entry.avatar_url && <AvatarImage src={entry.avatar_url} alt={name} />}
                     <AvatarFallback className="bg-gradient-primary text-primary-foreground text-xs">
                       {entry.initials || name.charAt(0)}
@@ -89,7 +111,7 @@ export const LeaderboardWidget = () => {
                   </Avatar>
 
                   <div className="flex-1 min-w-0">
-                    <div className="font-semibold text-sm truncate group-hover:text-accent transition-colors">
+                    <div className={`font-semibold truncate group-hover:text-accent transition-colors ${isPodium ? "text-base" : "text-sm"}`}>
                       {name}
                     </div>
                     {deptName && (
@@ -102,7 +124,12 @@ export const LeaderboardWidget = () => {
                       <BookOpen className="h-3.5 w-3.5" />
                       {entry.publications_count}
                     </div>
-                    <Badge variant="secondary" className="bg-gold/15 text-foreground border-gold/30 font-bold tabular-nums">
+                    <Badge
+                      variant="secondary"
+                      className={`bg-gold/15 text-foreground border-gold/30 font-bold tabular-nums ${
+                        isPodium ? "text-sm px-3 py-1" : ""
+                      }`}
+                    >
                       {entry.score}
                     </Badge>
                   </div>
