@@ -96,3 +96,40 @@ export const deleteReview = async (id: string) => {
   const { error } = await supabase.from("publication_reviews").delete().eq("id", id);
   if (error) throw error;
 };
+
+export interface PublicationRatingSummary {
+  publication_id: string;
+  count: number;
+  average: number;
+}
+
+export const fetchPublicationsRatings = async (
+  publicationIds: string[]
+): Promise<Map<string, PublicationRatingSummary>> => {
+  const map = new Map<string, PublicationRatingSummary>();
+  if (publicationIds.length === 0) return map;
+
+  const { data, error } = await supabase
+    .from("publication_reviews")
+    .select("publication_id, rating")
+    .in("publication_id", publicationIds);
+  if (error) throw error;
+
+  const byPub = new Map<string, number[]>();
+  for (const row of data ?? []) {
+    const arr = byPub.get(row.publication_id) ?? [];
+    arr.push(row.rating);
+    byPub.set(row.publication_id, arr);
+  }
+
+  for (const id of publicationIds) {
+    const ratings = byPub.get(id) ?? [];
+    const sum = ratings.reduce((a, b) => a + b, 0);
+    map.set(id, {
+      publication_id: id,
+      count: ratings.length,
+      average: ratings.length ? sum / ratings.length : 0,
+    });
+  }
+  return map;
+};
