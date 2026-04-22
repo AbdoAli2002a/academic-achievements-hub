@@ -54,6 +54,8 @@ export const PublicationsList = ({ publications, ownerId, ownerName }: Props) =>
   const [sort, setSort] = useState<SortKey>("newest");
   const [type, setType] = useState<FilterType>("all");
   const [query, setQuery] = useState("");
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   const ids = useMemo(() => publications.map((p) => p.id), [publications]);
 
