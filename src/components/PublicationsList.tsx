@@ -279,7 +279,7 @@ export const PublicationsList = ({ publications, ownerId, ownerName }: Props) =>
         </p>
       ) : (
         <ul className="space-y-4">
-          {filtered.map((p) => {
+          {paged.map((p) => {
             const title = isAr ? p.title_ar : p.title_en || p.title_ar;
             const r = ratingsMap?.get(p.id);
             return (
@@ -328,6 +328,55 @@ export const PublicationsList = ({ publications, ownerId, ownerName }: Props) =>
             );
           })}
         </ul>
+      )}
+
+      {/* Pagination */}
+      {filtered.length > pageSize && (
+        <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-border/40">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <span>
+              {t("pubFilter.page")} {safePage} {t("pubFilter.of")} {totalPages}
+            </span>
+            <span className="opacity-50">·</span>
+            <Select
+              value={String(pageSize)}
+              onValueChange={(v) => setPageSize(Number(v))}
+            >
+              <SelectTrigger className="w-auto h-7 text-xs gap-1">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {[5, 10, 20, 50].map((n) => (
+                  <SelectItem key={n} value={String(n)}>
+                    {n} {t("pubFilter.perPage")}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="flex items-center gap-1">
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8"
+              disabled={safePage <= 1}
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+            >
+              {isAr ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+              <span className="ms-1">{t("pubFilter.prev")}</span>
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8"
+              disabled={safePage >= totalPages}
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+            >
+              <span className="me-1">{t("pubFilter.next")}</span>
+              {isAr ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+            </Button>
+          </div>
+        </div>
       )}
     </div>
   );
