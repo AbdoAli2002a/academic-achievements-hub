@@ -239,12 +239,13 @@ export const exportPublicationsPdf = (
 </body>
 </html>`;
 
+  const scopeTag = scope === "page" ? "page" : "all";
+  const baseName = ownerName ? `publications_${ownerName}_${scopeTag}` : `publications_${scopeTag}`;
   const win = window.open("", "_blank", "noopener,noreferrer,width=900,height=700");
   if (!win) {
     // Popup blocked — fallback: download as .html so user can open & print
     const blob = new Blob([html], { type: "text/html;charset=utf-8" });
-    const base = ownerName ? `publications_${ownerName}` : "publications";
-    triggerDownload(blob, `${sanitizeFilename(base)}.html`);
+    triggerDownload(blob, `${sanitizeFilename(baseName)}.html`);
     return false;
   }
   win.document.open();
