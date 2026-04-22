@@ -1,9 +1,10 @@
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
-import { ExternalLink, Star, BookOpen, Quote } from "lucide-react";
+import { ExternalLink, Star, BookOpen, Quote, Search, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { PublicationReviews } from "@/components/PublicationReviews";
 import { fetchPublicationsRatings } from "@/lib/reviewsApi";
@@ -22,6 +23,7 @@ export const PublicationsList = ({ publications, ownerId }: Props) => {
   const isAr = i18n.language === "ar";
   const [sort, setSort] = useState<SortKey>("newest");
   const [type, setType] = useState<FilterType>("all");
+  const [query, setQuery] = useState("");
 
   const ids = useMemo(() => publications.map((p) => p.id), [publications]);
 
@@ -32,7 +34,24 @@ export const PublicationsList = ({ publications, ownerId }: Props) => {
   });
 
   const filtered = useMemo(() => {
-    const arr = type === "all" ? [...publications] : publications.filter((p) => p.type === type);
+    let arr = type === "all" ? [...publications] : publications.filter((p) => p.type === type);
+    const q = query.trim().toLowerCase();
+    if (q) {
+      arr = arr.filter((p) => {
+        const haystack = [
+          p.title_ar,
+          p.title_en,
+          p.abstract,
+          p.journal_name,
+          p.publisher,
+          p.authors,
+        ]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase();
+        return haystack.includes(q);
+      });
+    }
     arr.sort((a, b) => {
       switch (sort) {
         case "newest":
@@ -56,12 +75,33 @@ export const PublicationsList = ({ publications, ownerId }: Props) => {
       }
     });
     return arr;
-  }, [publications, type, sort, ratingsMap]);
+  }, [publications, type, sort, ratingsMap, query]);
 
   const TYPE_OPTIONS: FilterType[] = ["all", "journal", "conference", "book", "chapter", "thesis", "other"];
 
   return (
     <div className="space-y-4">
+      {/* Search */}
+      <div className="relative">
+        <Search className="absolute top-1/2 -translate-y-1/2 start-3 h-4 w-4 text-muted-foreground pointer-events-none" />
+        <Input
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder={t("pubFilter.searchPlaceholder")}
+          className="ps-9 pe-9 h-9"
+        />
+        {query && (
+          <button
+            type="button"
+            onClick={() => setQuery("")}
+            aria-label={t("pubFilter.clearSearch")}
+            className="absolute top-1/2 -translate-y-1/2 end-2 p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <X className="h-3.5 w-3.5" />
+          </button>
+        )}
+      </div>
+
       {/* Filters / sort bar */}
       <div className="flex flex-wrap items-center gap-2">
         <Select value={sort} onValueChange={(v) => setSort(v as SortKey)}>
