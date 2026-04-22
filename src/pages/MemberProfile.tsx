@@ -119,7 +119,11 @@ const MemberProfile = () => {
 
             {member.publications.length > 0 && (
               <Section title={t("member.publications")}>
-                <PublicationsList publications={member.publications} ownerId={member.id} />
+                <PublicationsList
+                  publications={member.publications}
+                  ownerId={member.id}
+                  ownerName={isAr ? member.name_ar : (member.name_en || member.name_ar)}
+                />
               </Section>
             )}
 
