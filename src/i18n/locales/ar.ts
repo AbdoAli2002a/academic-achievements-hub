@@ -118,6 +118,8 @@ const ar = {
     mostCited: "الأكثر استشهاداً",
     allTypes: "كل الأنواع",
     noResults: "لا توجد أبحاث مطابقة للفلتر",
+    searchPlaceholder: "ابحث في العنوان أو الملخص أو المجلة...",
+    clearSearch: "مسح",
   },
   search: {
     title: "البحث المتقدم",

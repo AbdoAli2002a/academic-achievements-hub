@@ -120,6 +120,8 @@ const en: Translations = {
     mostCited: "Most Cited",
     allTypes: "All Types",
     noResults: "No publications match the filter",
+    searchPlaceholder: "Search title, abstract, or journal...",
+    clearSearch: "Clear",
   },
   search: {
     title: "Advanced Search",

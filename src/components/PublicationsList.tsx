@@ -1,9 +1,10 @@
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
-import { ExternalLink, Star, BookOpen, Quote } from "lucide-react";
+import { ExternalLink, Star, BookOpen, Quote, Search, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { PublicationReviews } from "@/components/PublicationReviews";
 import { fetchPublicationsRatings } from "@/lib/reviewsApi";
@@ -22,6 +23,7 @@ export const PublicationsList = ({ publications, ownerId }: Props) => {
   const isAr = i18n.language === "ar";
   const [sort, setSort] = useState<SortKey>("newest");
   const [type, setType] = useState<FilterType>("all");
+  const [query, setQuery] = useState("");
 
   const ids = useMemo(() => publications.map((p) => p.id), [publications]);
 
@@ -32,7 +34,24 @@ export const PublicationsList = ({ publications, ownerId }: Props) => {
   });
 
   const filtered = useMemo(() => {
-    const arr = type === "all" ? [...publications] : publications.filter((p) => p.type === type);
+    let arr = type === "all" ? [...publications] : publications.filter((p) => p.type === type);
+    const q = query.trim().toLowerCase();
+    if (q) {
+      arr = arr.filter((p) => {
+        const haystack = [
+          p.title_ar,
+          p.title_en,
+          p.abstract,
+          p.journal_name,
+          p.publisher,
+          p.authors,
+        ]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase();
+        return haystack.includes(q);
+      });
+    }
     arr.sort((a, b) => {
       switch (sort) {
         case "newest":
