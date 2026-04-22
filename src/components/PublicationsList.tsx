@@ -148,6 +148,87 @@ export const PublicationsList = ({ publications, ownerId, ownerName }: Props) =>
           </SelectContent>
         </Select>
 
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="sm" className="h-9 gap-1.5">
+              <Download className="h-3.5 w-3.5" />
+              {t("pubFilter.export")}
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align={isAr ? "start" : "end"}>
+            <DropdownMenuItem
+              onClick={() => {
+                if (filtered.length === 0) {
+                  toast.error(t("pubFilter.exportEmpty"));
+                  return;
+                }
+                const labels = {
+                  pdfTitle: t("pubFilter.pdfTitle"),
+                  pdfMember: t("pubFilter.pdfMember"),
+                  pdfFilters: t("pubFilter.pdfFilters"),
+                  pdfGeneratedAt: t("pubFilter.pdfGeneratedAt"),
+                  colTitle: t("pubFilter.colTitle"),
+                  colYear: t("pubFilter.colYear"),
+                  colType: t("pubFilter.colType"),
+                  colJournal: t("pubFilter.colJournal"),
+                  colCitations: t("pubFilter.colCitations"),
+                  colRating: t("pubFilter.colRating"),
+                  colUrl: t("pubFilter.colUrl"),
+                  typeLabel: (tp: string) => t(`pub.${tp}`, tp),
+                  sortLabel: t(`pubFilter.${sort}`),
+                  typeFilterLabel: type === "all" ? t("pubFilter.allTypes") : t(`pub.${type}`),
+                  searchLabel: t("pubFilter.searchPlaceholder").replace(/[.…]+$/, ""),
+                };
+                exportPublicationsPdf(filtered, ratingsMap, {
+                  isAr,
+                  ownerName,
+                  filters: { query, type, sort },
+                  labels,
+                });
+                toast.success(t("pubFilter.exportDone"));
+              }}
+            >
+              <FileText className="h-4 w-4 me-2" />
+              {t("pubFilter.exportPdf")}
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => {
+                if (filtered.length === 0) {
+                  toast.error(t("pubFilter.exportEmpty"));
+                  return;
+                }
+                const labels = {
+                  pdfTitle: t("pubFilter.pdfTitle"),
+                  pdfMember: t("pubFilter.pdfMember"),
+                  pdfFilters: t("pubFilter.pdfFilters"),
+                  pdfGeneratedAt: t("pubFilter.pdfGeneratedAt"),
+                  colTitle: t("pubFilter.colTitle"),
+                  colYear: t("pubFilter.colYear"),
+                  colType: t("pubFilter.colType"),
+                  colJournal: t("pubFilter.colJournal"),
+                  colCitations: t("pubFilter.colCitations"),
+                  colRating: t("pubFilter.colRating"),
+                  colUrl: t("pubFilter.colUrl"),
+                  typeLabel: (tp: string) => t(`pub.${tp}`, tp),
+                  sortLabel: t(`pubFilter.${sort}`),
+                  typeFilterLabel: type === "all" ? t("pubFilter.allTypes") : t(`pub.${type}`),
+                  searchLabel: t("pubFilter.searchPlaceholder").replace(/[.…]+$/, ""),
+                };
+                exportPublicationsCsv(filtered, ratingsMap, {
+                  isAr,
+                  ownerName,
+                  filters: { query, type, sort },
+                  labels,
+                });
+                toast.success(t("pubFilter.exportDone"));
+              }}
+            >
+              <FileSpreadsheet className="h-4 w-4 me-2" />
+              {t("pubFilter.exportCsv")}
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+
         <span className="text-xs text-muted-foreground ms-auto">
           {filtered.length} / {publications.length}
         </span>
