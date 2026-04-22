@@ -37,7 +37,7 @@ const sanitizeFilename = (s: string) =>
 const escapeCsvCell = (val: unknown) => {
   if (val === null || val === undefined) return "";
   const s = String(val).replace(/\r?\n/g, " ").trim();
-  if (/[",;\n\r]/.test(s)) return `"${s.replace(/"/g, '""')}"`;
+  if (/[",;\n\r\t]/.test(s)) return `"${s.replace(/"/g, '""')}"`;
   return s;
 };
 
@@ -58,11 +58,28 @@ const titleOf = (p: Publication, isAr: boolean) =>
 const journalOf = (p: Publication) =>
   [p.journal_name, p.publisher].filter(Boolean).join(" — ");
 
+// Audit report returned to caller after CSV generation
+export interface CsvAudit {
+  rowCount: number;
+  byteSize: number;
+  hasArabic: boolean;
+  hasNonAscii: boolean;
+  hasSymbols: boolean;
+  encoding: "utf-8";
+  hasBom: boolean;
+}
+
+const ARABIC_RE = /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/;
+// Common symbol/dingbat/emoji blocks
+const SYMBOL_RE =
+  /[\u2010-\u206F\u2190-\u21FF\u2200-\u22FF\u2300-\u23FF\u2600-\u27BF\u{1F300}-\u{1FAFF}]/u;
+
 export const exportPublicationsCsv = (
   pubs: Publication[],
   ratings: ExportRatings | undefined,
   ctx: ExportContext,
-) => {
+  scope: "all" | "page" = "all",
+): CsvAudit => {
   const { labels, isAr, ownerName } = ctx;
   const headers = [
     labels.colTitle,
@@ -89,11 +106,33 @@ export const exportPublicationsCsv = (
   });
 
   const lines = [headers, ...rows].map((row) => row.map(escapeCsvCell).join(","));
-  // BOM for Excel UTF-8
-  const csv = "\uFEFF" + lines.join("\r\n");
-  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-  const base = ownerName ? `publications_${ownerName}` : "publications";
+  const body = lines.join("\r\n") + "\r\n";
+
+  // Encoding audit BEFORE prepending BOM
+  const hasArabic = ARABIC_RE.test(body);
+  const hasSymbols = SYMBOL_RE.test(body);
+  // eslint-disable-next-line no-control-regex
+  const hasNonAscii = /[^\x00-\x7F]/.test(body);
+
+  // Always emit UTF-8 with BOM so Excel auto-detects encoding for Arabic/symbols
+  const BOM = "\uFEFF";
+  const encoder = new TextEncoder(); // always produces valid UTF-8 bytes
+  const bytes = encoder.encode(BOM + body);
+  const blob = new Blob([bytes], { type: "text/csv;charset=utf-8" });
+
+  const scopeTag = scope === "page" ? "page" : "all";
+  const base = ownerName ? `publications_${ownerName}_${scopeTag}` : `publications_${scopeTag}`;
   triggerDownload(blob, `${sanitizeFilename(base)}.csv`);
+
+  return {
+    rowCount: rows.length,
+    byteSize: bytes.byteLength,
+    hasArabic,
+    hasNonAscii,
+    hasSymbols,
+    encoding: "utf-8",
+    hasBom: true,
+  };
 };
 
 const escapeHtml = (s: unknown) => {
@@ -110,6 +149,7 @@ export const exportPublicationsPdf = (
   pubs: Publication[],
   ratings: ExportRatings | undefined,
   ctx: ExportContext,
+  scope: "all" | "page" = "all",
 ) => {
   const { labels, isAr, ownerName, filters } = ctx;
   const dir = isAr ? "rtl" : "ltr";
@@ -199,12 +239,13 @@ export const exportPublicationsPdf = (
 </body>
 </html>`;
 
+  const scopeTag = scope === "page" ? "page" : "all";
+  const baseName = ownerName ? `publications_${ownerName}_${scopeTag}` : `publications_${scopeTag}`;
   const win = window.open("", "_blank", "noopener,noreferrer,width=900,height=700");
   if (!win) {
     // Popup blocked — fallback: download as .html so user can open & print
     const blob = new Blob([html], { type: "text/html;charset=utf-8" });
-    const base = ownerName ? `publications_${ownerName}` : "publications";
-    triggerDownload(blob, `${sanitizeFilename(base)}.html`);
+    triggerDownload(blob, `${sanitizeFilename(baseName)}.html`);
     return false;
   }
   win.document.open();

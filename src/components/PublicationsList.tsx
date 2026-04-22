@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -11,6 +11,8 @@ import {
   Download,
   FileText,
   FileSpreadsheet,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -20,11 +22,20 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { PublicationReviews } from "@/components/PublicationReviews";
 import { fetchPublicationsRatings } from "@/lib/reviewsApi";
-import { exportPublicationsCsv, exportPublicationsPdf } from "@/lib/publicationsExport";
+import {
+  exportPublicationsCsv,
+  exportPublicationsPdf,
+  type CsvAudit,
+} from "@/lib/publicationsExport";
 import { toast } from "sonner";
 import type { Publication } from "@/lib/api";
 
@@ -43,6 +54,8 @@ export const PublicationsList = ({ publications, ownerId, ownerName }: Props) =>
   const [sort, setSort] = useState<SortKey>("newest");
   const [type, setType] = useState<FilterType>("all");
   const [query, setQuery] = useState("");
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   const ids = useMemo(() => publications.map((p) => p.id), [publications]);
 
@@ -95,6 +108,66 @@ export const PublicationsList = ({ publications, ownerId, ownerName }: Props) =>
     });
     return arr;
   }, [publications, type, sort, ratingsMap, query]);
+
+  // Reset to page 1 whenever filters/search/sort/pageSize change
+  useEffect(() => {
+    setPage(1);
+  }, [query, type, sort, pageSize, publications.length]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+  const safePage = Math.min(page, totalPages);
+  const pageStart = (safePage - 1) * pageSize;
+  const paged = useMemo(
+    () => filtered.slice(pageStart, pageStart + pageSize),
+    [filtered, pageStart, pageSize],
+  );
+
+  const buildLabels = () => ({
+    pdfTitle: t("pubFilter.pdfTitle"),
+    pdfMember: t("pubFilter.pdfMember"),
+    pdfFilters: t("pubFilter.pdfFilters"),
+    pdfGeneratedAt: t("pubFilter.pdfGeneratedAt"),
+    colTitle: t("pubFilter.colTitle"),
+    colYear: t("pubFilter.colYear"),
+    colType: t("pubFilter.colType"),
+    colJournal: t("pubFilter.colJournal"),
+    colCitations: t("pubFilter.colCitations"),
+    colRating: t("pubFilter.colRating"),
+    colUrl: t("pubFilter.colUrl"),
+    typeLabel: (tp: string) => t(`pub.${tp}`, tp),
+    sortLabel: t(`pubFilter.${sort}`),
+    typeFilterLabel: type === "all" ? t("pubFilter.allTypes") : t(`pub.${type}`),
+    searchLabel: t("pubFilter.searchPlaceholder").replace(/[.…]+$/, ""),
+  });
+
+  const reportCsvAudit = (audit: CsvAudit) => {
+    if (audit.hasArabic) {
+      toast.message(t("pubFilter.exportEncodingArabic"));
+    } else if (audit.hasSymbols || audit.hasNonAscii) {
+      toast.message(t("pubFilter.exportEncodingSymbols"));
+    }
+  };
+
+  const runExport = (format: "pdf" | "csv", scope: "page" | "all") => {
+    const data = scope === "page" ? paged : filtered;
+    if (data.length === 0) {
+      toast.error(t("pubFilter.exportEmpty"));
+      return;
+    }
+    const ctx = {
+      isAr,
+      ownerName,
+      filters: { query, type, sort },
+      labels: buildLabels(),
+    };
+    if (format === "pdf") {
+      exportPublicationsPdf(data, ratingsMap, ctx, scope);
+    } else {
+      const audit = exportPublicationsCsv(data, ratingsMap, ctx, scope);
+      reportCsvAudit(audit);
+    }
+    toast.success(t("pubFilter.exportDone"));
+  };
 
   const TYPE_OPTIONS: FilterType[] = ["all", "journal", "conference", "book", "chapter", "thesis", "other"];
 
@@ -155,77 +228,43 @@ export const PublicationsList = ({ publications, ownerId, ownerName }: Props) =>
               {t("pubFilter.export")}
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align={isAr ? "start" : "end"}>
-            <DropdownMenuItem
-              onClick={() => {
-                if (filtered.length === 0) {
-                  toast.error(t("pubFilter.exportEmpty"));
-                  return;
-                }
-                const labels = {
-                  pdfTitle: t("pubFilter.pdfTitle"),
-                  pdfMember: t("pubFilter.pdfMember"),
-                  pdfFilters: t("pubFilter.pdfFilters"),
-                  pdfGeneratedAt: t("pubFilter.pdfGeneratedAt"),
-                  colTitle: t("pubFilter.colTitle"),
-                  colYear: t("pubFilter.colYear"),
-                  colType: t("pubFilter.colType"),
-                  colJournal: t("pubFilter.colJournal"),
-                  colCitations: t("pubFilter.colCitations"),
-                  colRating: t("pubFilter.colRating"),
-                  colUrl: t("pubFilter.colUrl"),
-                  typeLabel: (tp: string) => t(`pub.${tp}`, tp),
-                  sortLabel: t(`pubFilter.${sort}`),
-                  typeFilterLabel: type === "all" ? t("pubFilter.allTypes") : t(`pub.${type}`),
-                  searchLabel: t("pubFilter.searchPlaceholder").replace(/[.…]+$/, ""),
-                };
-                exportPublicationsPdf(filtered, ratingsMap, {
-                  isAr,
-                  ownerName,
-                  filters: { query, type, sort },
-                  labels,
-                });
-                toast.success(t("pubFilter.exportDone"));
-              }}
-            >
-              <FileText className="h-4 w-4 me-2" />
-              {t("pubFilter.exportPdf")}
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={() => {
-                if (filtered.length === 0) {
-                  toast.error(t("pubFilter.exportEmpty"));
-                  return;
-                }
-                const labels = {
-                  pdfTitle: t("pubFilter.pdfTitle"),
-                  pdfMember: t("pubFilter.pdfMember"),
-                  pdfFilters: t("pubFilter.pdfFilters"),
-                  pdfGeneratedAt: t("pubFilter.pdfGeneratedAt"),
-                  colTitle: t("pubFilter.colTitle"),
-                  colYear: t("pubFilter.colYear"),
-                  colType: t("pubFilter.colType"),
-                  colJournal: t("pubFilter.colJournal"),
-                  colCitations: t("pubFilter.colCitations"),
-                  colRating: t("pubFilter.colRating"),
-                  colUrl: t("pubFilter.colUrl"),
-                  typeLabel: (tp: string) => t(`pub.${tp}`, tp),
-                  sortLabel: t(`pubFilter.${sort}`),
-                  typeFilterLabel: type === "all" ? t("pubFilter.allTypes") : t(`pub.${type}`),
-                  searchLabel: t("pubFilter.searchPlaceholder").replace(/[.…]+$/, ""),
-                };
-                exportPublicationsCsv(filtered, ratingsMap, {
-                  isAr,
-                  ownerName,
-                  filters: { query, type, sort },
-                  labels,
-                });
-                toast.success(t("pubFilter.exportDone"));
-              }}
-            >
-              <FileSpreadsheet className="h-4 w-4 me-2" />
-              {t("pubFilter.exportCsv")}
-            </DropdownMenuItem>
+          <DropdownMenuContent align={isAr ? "start" : "end"} className="min-w-[200px]">
+            <DropdownMenuLabel className="text-xs text-muted-foreground">
+              {t("pubFilter.export")}
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger>
+                <FileText className="h-4 w-4 me-2" />
+                {t("pubFilter.exportPdf")}
+              </DropdownMenuSubTrigger>
+              <DropdownMenuSubContent>
+                <DropdownMenuItem onClick={() => runExport("pdf", "page")}>
+                  {t("pubFilter.exportScopePage")}{" "}
+                  <span className="ms-1 text-xs text-muted-foreground">({paged.length})</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => runExport("pdf", "all")}>
+                  {t("pubFilter.exportScopeAll")}{" "}
+                  <span className="ms-1 text-xs text-muted-foreground">({filtered.length})</span>
+                </DropdownMenuItem>
+              </DropdownMenuSubContent>
+            </DropdownMenuSub>
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger>
+                <FileSpreadsheet className="h-4 w-4 me-2" />
+                {t("pubFilter.exportCsv")}
+              </DropdownMenuSubTrigger>
+              <DropdownMenuSubContent>
+                <DropdownMenuItem onClick={() => runExport("csv", "page")}>
+                  {t("pubFilter.exportScopePage")}{" "}
+                  <span className="ms-1 text-xs text-muted-foreground">({paged.length})</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => runExport("csv", "all")}>
+                  {t("pubFilter.exportScopeAll")}{" "}
+                  <span className="ms-1 text-xs text-muted-foreground">({filtered.length})</span>
+                </DropdownMenuItem>
+              </DropdownMenuSubContent>
+            </DropdownMenuSub>
           </DropdownMenuContent>
         </DropdownMenu>
 
@@ -240,7 +279,7 @@ export const PublicationsList = ({ publications, ownerId, ownerName }: Props) =>
         </p>
       ) : (
         <ul className="space-y-4">
-          {filtered.map((p) => {
+          {paged.map((p) => {
             const title = isAr ? p.title_ar : p.title_en || p.title_ar;
             const r = ratingsMap?.get(p.id);
             return (
@@ -289,6 +328,55 @@ export const PublicationsList = ({ publications, ownerId, ownerName }: Props) =>
             );
           })}
         </ul>
+      )}
+
+      {/* Pagination */}
+      {filtered.length > pageSize && (
+        <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-border/40">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <span>
+              {t("pubFilter.page")} {safePage} {t("pubFilter.of")} {totalPages}
+            </span>
+            <span className="opacity-50">·</span>
+            <Select
+              value={String(pageSize)}
+              onValueChange={(v) => setPageSize(Number(v))}
+            >
+              <SelectTrigger className="w-auto h-7 text-xs gap-1">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {[5, 10, 20, 50].map((n) => (
+                  <SelectItem key={n} value={String(n)}>
+                    {n} {t("pubFilter.perPage")}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="flex items-center gap-1">
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8"
+              disabled={safePage <= 1}
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+            >
+              {isAr ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+              <span className="ms-1">{t("pubFilter.prev")}</span>
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8"
+              disabled={safePage >= totalPages}
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+            >
+              <span className="me-1">{t("pubFilter.next")}</span>
+              {isAr ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+            </Button>
+          </div>
+        </div>
       )}
     </div>
   );
