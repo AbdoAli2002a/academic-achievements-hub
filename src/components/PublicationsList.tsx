@@ -75,12 +75,33 @@ export const PublicationsList = ({ publications, ownerId }: Props) => {
       }
     });
     return arr;
-  }, [publications, type, sort, ratingsMap]);
+  }, [publications, type, sort, ratingsMap, query]);
 
   const TYPE_OPTIONS: FilterType[] = ["all", "journal", "conference", "book", "chapter", "thesis", "other"];
 
   return (
     <div className="space-y-4">
+      {/* Search */}
+      <div className="relative">
+        <Search className="absolute top-1/2 -translate-y-1/2 start-3 h-4 w-4 text-muted-foreground pointer-events-none" />
+        <Input
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder={t("pubFilter.searchPlaceholder")}
+          className="ps-9 pe-9 h-9"
+        />
+        {query && (
+          <button
+            type="button"
+            onClick={() => setQuery("")}
+            aria-label={t("pubFilter.clearSearch")}
+            className="absolute top-1/2 -translate-y-1/2 end-2 p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <X className="h-3.5 w-3.5" />
+          </button>
+        )}
+      </div>
+
       {/* Filters / sort bar */}
       <div className="flex flex-wrap items-center gap-2">
         <Select value={sort} onValueChange={(v) => setSort(v as SortKey)}>
