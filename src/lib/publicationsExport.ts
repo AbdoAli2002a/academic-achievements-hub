@@ -149,6 +149,7 @@ export const exportPublicationsPdf = (
   pubs: Publication[],
   ratings: ExportRatings | undefined,
   ctx: ExportContext,
+  scope: "all" | "page" = "all",
 ) => {
   const { labels, isAr, ownerName, filters } = ctx;
   const dir = isAr ? "rtl" : "ltr";
