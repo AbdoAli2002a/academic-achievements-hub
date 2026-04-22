@@ -1,6 +1,9 @@
 // Admin-only edge function to list auth users with their profiles & roles
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { createClient } from '@supabase/supabase-js';
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
+export const supabase = createClient(supabaseUrl, supabaseKey);
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
