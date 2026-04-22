@@ -109,6 +109,66 @@ export const PublicationsList = ({ publications, ownerId, ownerName }: Props) =>
     return arr;
   }, [publications, type, sort, ratingsMap, query]);
 
+  // Reset to page 1 whenever filters/search/sort/pageSize change
+  useEffect(() => {
+    setPage(1);
+  }, [query, type, sort, pageSize, publications.length]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+  const safePage = Math.min(page, totalPages);
+  const pageStart = (safePage - 1) * pageSize;
+  const paged = useMemo(
+    () => filtered.slice(pageStart, pageStart + pageSize),
+    [filtered, pageStart, pageSize],
+  );
+
+  const buildLabels = () => ({
+    pdfTitle: t("pubFilter.pdfTitle"),
+    pdfMember: t("pubFilter.pdfMember"),
+    pdfFilters: t("pubFilter.pdfFilters"),
+    pdfGeneratedAt: t("pubFilter.pdfGeneratedAt"),
+    colTitle: t("pubFilter.colTitle"),
+    colYear: t("pubFilter.colYear"),
+    colType: t("pubFilter.colType"),
+    colJournal: t("pubFilter.colJournal"),
+    colCitations: t("pubFilter.colCitations"),
+    colRating: t("pubFilter.colRating"),
+    colUrl: t("pubFilter.colUrl"),
+    typeLabel: (tp: string) => t(`pub.${tp}`, tp),
+    sortLabel: t(`pubFilter.${sort}`),
+    typeFilterLabel: type === "all" ? t("pubFilter.allTypes") : t(`pub.${type}`),
+    searchLabel: t("pubFilter.searchPlaceholder").replace(/[.…]+$/, ""),
+  });
+
+  const reportCsvAudit = (audit: CsvAudit) => {
+    if (audit.hasArabic) {
+      toast.message(t("pubFilter.exportEncodingArabic"));
+    } else if (audit.hasSymbols || audit.hasNonAscii) {
+      toast.message(t("pubFilter.exportEncodingSymbols"));
+    }
+  };
+
+  const runExport = (format: "pdf" | "csv", scope: "page" | "all") => {
+    const data = scope === "page" ? paged : filtered;
+    if (data.length === 0) {
+      toast.error(t("pubFilter.exportEmpty"));
+      return;
+    }
+    const ctx = {
+      isAr,
+      ownerName,
+      filters: { query, type, sort },
+      labels: buildLabels(),
+    };
+    if (format === "pdf") {
+      exportPublicationsPdf(data, ratingsMap, ctx, scope);
+    } else {
+      const audit = exportPublicationsCsv(data, ratingsMap, ctx, scope);
+      reportCsvAudit(audit);
+    }
+    toast.success(t("pubFilter.exportDone"));
+  };
+
   const TYPE_OPTIONS: FilterType[] = ["all", "journal", "conference", "book", "chapter", "thesis", "other"];
 
   return (
@@ -168,77 +228,43 @@ export const PublicationsList = ({ publications, ownerId, ownerName }: Props) =>
               {t("pubFilter.export")}
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align={isAr ? "start" : "end"}>
-            <DropdownMenuItem
-              onClick={() => {
-                if (filtered.length === 0) {
-                  toast.error(t("pubFilter.exportEmpty"));
-                  return;
-                }
-                const labels = {
-                  pdfTitle: t("pubFilter.pdfTitle"),
-                  pdfMember: t("pubFilter.pdfMember"),
-                  pdfFilters: t("pubFilter.pdfFilters"),
-                  pdfGeneratedAt: t("pubFilter.pdfGeneratedAt"),
-                  colTitle: t("pubFilter.colTitle"),
-                  colYear: t("pubFilter.colYear"),
-                  colType: t("pubFilter.colType"),
-                  colJournal: t("pubFilter.colJournal"),
-                  colCitations: t("pubFilter.colCitations"),
-                  colRating: t("pubFilter.colRating"),
-                  colUrl: t("pubFilter.colUrl"),
-                  typeLabel: (tp: string) => t(`pub.${tp}`, tp),
-                  sortLabel: t(`pubFilter.${sort}`),
-                  typeFilterLabel: type === "all" ? t("pubFilter.allTypes") : t(`pub.${type}`),
-                  searchLabel: t("pubFilter.searchPlaceholder").replace(/[.…]+$/, ""),
-                };
-                exportPublicationsPdf(filtered, ratingsMap, {
-                  isAr,
-                  ownerName,
-                  filters: { query, type, sort },
-                  labels,
-                });
-                toast.success(t("pubFilter.exportDone"));
-              }}
-            >
-              <FileText className="h-4 w-4 me-2" />
-              {t("pubFilter.exportPdf")}
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={() => {
-                if (filtered.length === 0) {
-                  toast.error(t("pubFilter.exportEmpty"));
-                  return;
-                }
-                const labels = {
-                  pdfTitle: t("pubFilter.pdfTitle"),
-                  pdfMember: t("pubFilter.pdfMember"),
-                  pdfFilters: t("pubFilter.pdfFilters"),
-                  pdfGeneratedAt: t("pubFilter.pdfGeneratedAt"),
-                  colTitle: t("pubFilter.colTitle"),
-                  colYear: t("pubFilter.colYear"),
-                  colType: t("pubFilter.colType"),
-                  colJournal: t("pubFilter.colJournal"),
-                  colCitations: t("pubFilter.colCitations"),
-                  colRating: t("pubFilter.colRating"),
-                  colUrl: t("pubFilter.colUrl"),
-                  typeLabel: (tp: string) => t(`pub.${tp}`, tp),
-                  sortLabel: t(`pubFilter.${sort}`),
-                  typeFilterLabel: type === "all" ? t("pubFilter.allTypes") : t(`pub.${type}`),
-                  searchLabel: t("pubFilter.searchPlaceholder").replace(/[.…]+$/, ""),
-                };
-                exportPublicationsCsv(filtered, ratingsMap, {
-                  isAr,
-                  ownerName,
-                  filters: { query, type, sort },
-                  labels,
-                });
-                toast.success(t("pubFilter.exportDone"));
-              }}
-            >
-              <FileSpreadsheet className="h-4 w-4 me-2" />
-              {t("pubFilter.exportCsv")}
-            </DropdownMenuItem>
+          <DropdownMenuContent align={isAr ? "start" : "end"} className="min-w-[200px]">
+            <DropdownMenuLabel className="text-xs text-muted-foreground">
+              {t("pubFilter.export")}
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger>
+                <FileText className="h-4 w-4 me-2" />
+                {t("pubFilter.exportPdf")}
+              </DropdownMenuSubTrigger>
+              <DropdownMenuSubContent>
+                <DropdownMenuItem onClick={() => runExport("pdf", "page")}>
+                  {t("pubFilter.exportScopePage")}{" "}
+                  <span className="ms-1 text-xs text-muted-foreground">({paged.length})</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => runExport("pdf", "all")}>
+                  {t("pubFilter.exportScopeAll")}{" "}
+                  <span className="ms-1 text-xs text-muted-foreground">({filtered.length})</span>
+                </DropdownMenuItem>
+              </DropdownMenuSubContent>
+            </DropdownMenuSub>
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger>
+                <FileSpreadsheet className="h-4 w-4 me-2" />
+                {t("pubFilter.exportCsv")}
+              </DropdownMenuSubTrigger>
+              <DropdownMenuSubContent>
+                <DropdownMenuItem onClick={() => runExport("csv", "page")}>
+                  {t("pubFilter.exportScopePage")}{" "}
+                  <span className="ms-1 text-xs text-muted-foreground">({paged.length})</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => runExport("csv", "all")}>
+                  {t("pubFilter.exportScopeAll")}{" "}
+                  <span className="ms-1 text-xs text-muted-foreground">({filtered.length})</span>
+                </DropdownMenuItem>
+              </DropdownMenuSubContent>
+            </DropdownMenuSub>
           </DropdownMenuContent>
         </DropdownMenu>
 
