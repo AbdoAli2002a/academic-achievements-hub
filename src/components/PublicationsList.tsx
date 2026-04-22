@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -11,6 +11,8 @@ import {
   Download,
   FileText,
   FileSpreadsheet,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -20,11 +22,20 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { PublicationReviews } from "@/components/PublicationReviews";
 import { fetchPublicationsRatings } from "@/lib/reviewsApi";
-import { exportPublicationsCsv, exportPublicationsPdf } from "@/lib/publicationsExport";
+import {
+  exportPublicationsCsv,
+  exportPublicationsPdf,
+  type CsvAudit,
+} from "@/lib/publicationsExport";
 import { toast } from "sonner";
 import type { Publication } from "@/lib/api";
 
