@@ -1,24 +1,43 @@
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
-import { ExternalLink, Star, BookOpen, Quote, Search, X } from "lucide-react";
+import {
+  ExternalLink,
+  Star,
+  BookOpen,
+  Quote,
+  Search,
+  X,
+  Download,
+  FileText,
+  FileSpreadsheet,
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { PublicationReviews } from "@/components/PublicationReviews";
 import { fetchPublicationsRatings } from "@/lib/reviewsApi";
+import { exportPublicationsCsv, exportPublicationsPdf } from "@/lib/publicationsExport";
+import { toast } from "sonner";
 import type { Publication } from "@/lib/api";
 
 interface Props {
   publications: Publication[];
   ownerId: string;
+  ownerName?: string;
 }
 
 type SortKey = "newest" | "oldest" | "topRated" | "mostCited";
 type FilterType = "all" | "journal" | "conference" | "book" | "chapter" | "thesis" | "other";
 
-export const PublicationsList = ({ publications, ownerId }: Props) => {
+export const PublicationsList = ({ publications, ownerId, ownerName }: Props) => {
   const { t, i18n } = useTranslation();
   const isAr = i18n.language === "ar";
   const [sort, setSort] = useState<SortKey>("newest");
