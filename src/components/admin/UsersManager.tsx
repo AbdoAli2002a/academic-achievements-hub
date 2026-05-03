@@ -17,6 +17,7 @@ import { toast } from "sonner";
 
 const roleLabel: Record<AppRole, string> = {
   super_admin: "مدير عام",
+  dean: "عميد الكلية",
   professor: "هيئة تدريس",
   visitor: "زائر",
 };

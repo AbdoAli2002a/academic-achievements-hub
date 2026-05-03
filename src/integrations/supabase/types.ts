@@ -168,6 +168,153 @@ export type Database = {
           },
         ]
       }
+      college_achievements: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description_ar: string | null
+          description_en: string | null
+          display_order: number
+          id: string
+          image_url: string | null
+          title_ar: string
+          title_en: string | null
+          updated_at: string
+          year: number | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description_ar?: string | null
+          description_en?: string | null
+          display_order?: number
+          id?: string
+          image_url?: string | null
+          title_ar: string
+          title_en?: string | null
+          updated_at?: string
+          year?: number | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description_ar?: string | null
+          description_en?: string | null
+          display_order?: number
+          id?: string
+          image_url?: string | null
+          title_ar?: string
+          title_en?: string | null
+          updated_at?: string
+          year?: number | null
+        }
+        Relationships: []
+      }
+      college_news: {
+        Row: {
+          content_ar: string | null
+          content_en: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          image_url: string | null
+          published_at: string
+          title_ar: string
+          title_en: string | null
+          updated_at: string
+        }
+        Insert: {
+          content_ar?: string | null
+          content_en?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          image_url?: string | null
+          published_at?: string
+          title_ar: string
+          title_en?: string | null
+          updated_at?: string
+        }
+        Update: {
+          content_ar?: string | null
+          content_en?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          image_url?: string | null
+          published_at?: string
+          title_ar?: string
+          title_en?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      dean_profile: {
+        Row: {
+          avatar_url: string | null
+          bio_ar: string | null
+          bio_en: string | null
+          created_at: string
+          email: string | null
+          id: string
+          message_ar: string | null
+          message_en: string | null
+          mission_ar: string | null
+          mission_en: string | null
+          name_ar: string
+          name_en: string | null
+          phone: string | null
+          title_ar: string | null
+          title_en: string | null
+          updated_at: string
+          user_id: string | null
+          vision_ar: string | null
+          vision_en: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio_ar?: string | null
+          bio_en?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          message_ar?: string | null
+          message_en?: string | null
+          mission_ar?: string | null
+          mission_en?: string | null
+          name_ar?: string
+          name_en?: string | null
+          phone?: string | null
+          title_ar?: string | null
+          title_en?: string | null
+          updated_at?: string
+          user_id?: string | null
+          vision_ar?: string | null
+          vision_en?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          bio_ar?: string | null
+          bio_en?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          message_ar?: string | null
+          message_en?: string | null
+          mission_ar?: string | null
+          mission_en?: string | null
+          name_ar?: string
+          name_en?: string | null
+          phone?: string | null
+          title_ar?: string | null
+          title_en?: string | null
+          updated_at?: string
+          user_id?: string | null
+          vision_ar?: string | null
+          vision_en?: string | null
+        }
+        Relationships: []
+      }
       departments: {
         Row: {
           color_class: string | null
@@ -587,7 +734,7 @@ export type Database = {
     }
     Enums: {
       academic_rank: "professor" | "associate" | "lecturer" | "assistant"
-      app_role: "super_admin" | "professor" | "visitor"
+      app_role: "super_admin" | "professor" | "visitor" | "dean"
       content_status: "pending" | "approved" | "rejected"
       event_type:
         | "conference"
@@ -732,7 +879,7 @@ export const Constants = {
   public: {
     Enums: {
       academic_rank: ["professor", "associate", "lecturer", "assistant"],
-      app_role: ["super_admin", "professor", "visitor"],
+      app_role: ["super_admin", "professor", "visitor", "dean"],
       content_status: ["pending", "approved", "rejected"],
       event_type: [
         "conference",
