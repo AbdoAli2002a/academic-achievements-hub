@@ -587,7 +587,7 @@ export type Database = {
     }
     Enums: {
       academic_rank: "professor" | "associate" | "lecturer" | "assistant"
-      app_role: "super_admin" | "professor" | "visitor"
+      app_role: "super_admin" | "professor" | "visitor" | "dean"
       content_status: "pending" | "approved" | "rejected"
       event_type:
         | "conference"
@@ -732,7 +732,7 @@ export const Constants = {
   public: {
     Enums: {
       academic_rank: ["professor", "associate", "lecturer", "assistant"],
-      app_role: ["super_admin", "professor", "visitor"],
+      app_role: ["super_admin", "professor", "visitor", "dean"],
       content_status: ["pending", "approved", "rejected"],
       event_type: [
         "conference",
