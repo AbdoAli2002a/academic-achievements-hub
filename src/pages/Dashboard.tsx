@@ -29,6 +29,7 @@ const Dashboard = () => {
   if (!user) return null;
 
   const isAdmin = roles.includes("super_admin");
+  const isDean = roles.includes("dean") || isAdmin;
   const isProfessor = roles.includes("professor") || isAdmin;
 
   const handleSignOut = async () => {
