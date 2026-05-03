@@ -74,13 +74,23 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {!isProfessor ? (
+      {isDean && (
+        <div className="card-elegant p-6 mt-6 mb-6 border-2 border-accent/40">
+          <div className="flex items-center gap-2 mb-4">
+            <GraduationCap className="h-6 w-6 text-accent" />
+            <h2 className="text-xl font-bold">لوحة عميد الكلية</h2>
+          </div>
+          <DeanPanel />
+        </div>
+      )}
+
+      {!isProfessor && !isDean ? (
         <div className="card-elegant p-8 text-center">
           <UserIcon className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
           <h3 className="font-bold mb-1">حسابك مسجّل كزائر</h3>
           <p className="text-sm text-muted-foreground">للحصول على صلاحيات إضافية تواصل مع إدارة الكلية لرفعك إلى عضو هيئة تدريس.</p>
         </div>
-      ) : (
+      ) : isProfessor ? (
         <Tabs defaultValue="profile" className="w-full">
           <TabsList className="grid w-full grid-cols-3 md:grid-cols-6 h-auto p-1">
             <TabsTrigger value="profile" className="gap-1.5 text-xs md:text-sm py-2"><UserIcon className="h-4 w-4" /> البروفايل</TabsTrigger>
@@ -97,16 +107,8 @@ const Dashboard = () => {
           <TabsContent value="certificates" className="mt-6"><ContentManager userId={user.id} kind="certificates" /></TabsContent>
           <TabsContent value="events" className="mt-6"><ContentManager userId={user.id} kind="events" /></TabsContent>
           <TabsContent value="cv" className="mt-6"><CvAndQrPanel userId={user.id} /></TabsContent>
-
-          {isAdmin && (
-            <div className="card-elegant p-6 mt-6 border-2 border-dashed border-accent/30">
-              <ShieldCheck className="h-8 w-8 text-accent mb-2" />
-              <h3 className="font-bold mb-1">لوحة الإدارة</h3>
-              <p className="text-sm text-muted-foreground">إدارة المستخدمين والمراجعة والإحصائيات — قيد التطوير في المرحلة 4.</p>
-            </div>
-          )}
         </Tabs>
-      )}
+      ) : null}
     </div>
   );
 };
