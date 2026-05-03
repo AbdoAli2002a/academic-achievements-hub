@@ -8,7 +8,10 @@ import { Badge } from "@/components/ui/badge";
 import { BadgeIcon } from "@/components/BadgeIcon";
 import { PublicationsList } from "@/components/PublicationsList";
 import { fetchMemberFullProfile } from "@/lib/api";
+import { generateCV } from "@/lib/cvGenerator";
+import { downloadQrCardPdf } from "@/lib/qrGenerator";
 import { toast } from "sonner";
+import { useState } from "react";
 
 const initialsFromName = (name: string | null | undefined) => {
   if (!name) return "؟";
