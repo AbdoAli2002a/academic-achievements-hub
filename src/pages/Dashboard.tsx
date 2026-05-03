@@ -8,6 +8,7 @@ import { useEffect } from "react";
 import { ProfileEditor } from "@/components/dashboard/ProfileEditor";
 import { ContentManager } from "@/components/dashboard/ContentManager";
 import { CvAndQrPanel } from "@/components/dashboard/CvAndQrPanel";
+import { DeanPanel } from "@/components/dashboard/DeanPanel";
 
 const Dashboard = () => {
   const { t } = useTranslation();
