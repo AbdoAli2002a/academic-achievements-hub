@@ -133,11 +133,13 @@ const MemberProfile = () => {
               )}
 
               <div className="flex flex-wrap gap-2">
-                <Button onClick={handleSoon} className="gap-2">
-                  <FileText className="h-4 w-4" /> {t("member.downloadCV")}
+                <Button onClick={handleCv} disabled={genCv} className="gap-2">
+                  {genCv ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileText className="h-4 w-4" />}
+                  {t("member.downloadCV")}
                 </Button>
-                <Button onClick={handleSoon} variant="outline" className="gap-2">
-                  <QrCode className="h-4 w-4" /> {t("member.downloadQR")}
+                <Button onClick={handleQr} disabled={genQr} variant="outline" className="gap-2">
+                  {genQr ? <Loader2 className="h-4 w-4 animate-spin" /> : <QrCode className="h-4 w-4" />}
+                  {t("member.downloadQR")}
                 </Button>
               </div>
             </div>
