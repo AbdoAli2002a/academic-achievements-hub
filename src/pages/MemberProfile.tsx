@@ -59,6 +59,38 @@ const MemberProfile = () => {
 
   const TYPE_ICON = { publication: BookOpen, award: Award, event: Calendar, certificate: GraduationCap };
 
+  const [genCv, setGenCv] = useState(false);
+  const [genQr, setGenQr] = useState(false);
+
+  const handleCv = async () => {
+    if (!member) return;
+    setGenCv(true);
+    try {
+      await generateCV(member, isAr ? "ar" : "en");
+      toast.success(isAr ? "تم توليد السيرة الذاتية" : "CV generated");
+    } catch (err: any) {
+      toast.error(isAr ? "فشل توليد السيرة" : "Failed to generate CV", { description: err.message });
+    } finally { setGenCv(false); }
+  };
+
+  const handleQr = async () => {
+    if (!member) return;
+    setGenQr(true);
+    try {
+      const profileUrl = `${window.location.origin}/member/${member.id}`;
+      const fileName = (member.name_en || member.name_ar || "member").replace(/\s+/g, "_");
+      await downloadQrCardPdf({
+        name: member.name_ar,
+        specialty: member.specialty_ar,
+        url: profileUrl,
+        facultyLine: "كلية التربية النوعية",
+      }, fileName);
+      toast.success(isAr ? "تم تحميل بطاقة QR" : "QR card downloaded");
+    } catch (err: any) {
+      toast.error(isAr ? "فشل توليد QR" : "Failed to generate QR", { description: err.message });
+    } finally { setGenQr(false); }
+  };
+
   const handleSoon = () => toast.info(t("common.soon"), { description: "سيتم تفعيل هذه الميزة في المرحلة القادمة." });
 
   return (
