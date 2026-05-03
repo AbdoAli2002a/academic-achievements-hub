@@ -53,7 +53,7 @@ const Dashboard = () => {
                 {roles.map((r) => (
                   <span key={r} className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-accent-soft text-accent text-xs font-semibold">
                     {r === "super_admin" ? <ShieldCheck className="h-3 w-3" /> : <UserIcon className="h-3 w-3" />}
-                    {r === "super_admin" ? "مدير عام" : r === "professor" ? "عضو هيئة تدريس" : "زائر"}
+                    {r === "super_admin" ? "مدير عام" : r === "dean" ? "عميد الكلية" : r === "professor" ? "عضو هيئة تدريس" : "زائر"}
                   </span>
                 ))}
               </div>
