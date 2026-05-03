@@ -8,7 +8,10 @@ import { Badge } from "@/components/ui/badge";
 import { BadgeIcon } from "@/components/BadgeIcon";
 import { PublicationsList } from "@/components/PublicationsList";
 import { fetchMemberFullProfile } from "@/lib/api";
+import { generateCV } from "@/lib/cvGenerator";
+import { downloadQrCardPdf } from "@/lib/qrGenerator";
 import { toast } from "sonner";
+import { useState } from "react";
 
 const initialsFromName = (name: string | null | undefined) => {
   if (!name) return "؟";
@@ -56,6 +59,38 @@ const MemberProfile = () => {
 
   const TYPE_ICON = { publication: BookOpen, award: Award, event: Calendar, certificate: GraduationCap };
 
+  const [genCv, setGenCv] = useState(false);
+  const [genQr, setGenQr] = useState(false);
+
+  const handleCv = async () => {
+    if (!member) return;
+    setGenCv(true);
+    try {
+      await generateCV(member, isAr ? "ar" : "en");
+      toast.success(isAr ? "تم توليد السيرة الذاتية" : "CV generated");
+    } catch (err: any) {
+      toast.error(isAr ? "فشل توليد السيرة" : "Failed to generate CV", { description: err.message });
+    } finally { setGenCv(false); }
+  };
+
+  const handleQr = async () => {
+    if (!member) return;
+    setGenQr(true);
+    try {
+      const profileUrl = `${window.location.origin}/member/${member.id}`;
+      const fileName = (member.name_en || member.name_ar || "member").replace(/\s+/g, "_");
+      await downloadQrCardPdf({
+        name: member.name_ar,
+        specialty: member.specialty_ar,
+        url: profileUrl,
+        facultyLine: "كلية التربية النوعية",
+      }, fileName);
+      toast.success(isAr ? "تم تحميل بطاقة QR" : "QR card downloaded");
+    } catch (err: any) {
+      toast.error(isAr ? "فشل توليد QR" : "Failed to generate QR", { description: err.message });
+    } finally { setGenQr(false); }
+  };
+
   const handleSoon = () => toast.info(t("common.soon"), { description: "سيتم تفعيل هذه الميزة في المرحلة القادمة." });
 
   return (
@@ -98,11 +133,13 @@ const MemberProfile = () => {
               )}
 
               <div className="flex flex-wrap gap-2">
-                <Button onClick={handleSoon} className="gap-2">
-                  <FileText className="h-4 w-4" /> {t("member.downloadCV")}
+                <Button onClick={handleCv} disabled={genCv} className="gap-2">
+                  {genCv ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileText className="h-4 w-4" />}
+                  {t("member.downloadCV")}
                 </Button>
-                <Button onClick={handleSoon} variant="outline" className="gap-2">
-                  <QrCode className="h-4 w-4" /> {t("member.downloadQR")}
+                <Button onClick={handleQr} disabled={genQr} variant="outline" className="gap-2">
+                  {genQr ? <Loader2 className="h-4 w-4 animate-spin" /> : <QrCode className="h-4 w-4" />}
+                  {t("member.downloadQR")}
                 </Button>
               </div>
             </div>
