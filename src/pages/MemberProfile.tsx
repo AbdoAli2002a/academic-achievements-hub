@@ -31,6 +31,9 @@ const MemberProfile = () => {
     enabled: !!id,
   });
 
+  const [genCv, setGenCv] = useState(false);
+  const [genQr, setGenQr] = useState(false);
+
   if (isLoading) {
     return <div className="container-academic py-20 flex justify-center"><Loader2 className="h-8 w-8 animate-spin text-accent" /></div>;
   }
@@ -59,8 +62,6 @@ const MemberProfile = () => {
 
   const TYPE_ICON = { publication: BookOpen, award: Award, event: Calendar, certificate: GraduationCap };
 
-  const [genCv, setGenCv] = useState(false);
-  const [genQr, setGenQr] = useState(false);
 
   const handleCv = async () => {
     if (!member) return;
