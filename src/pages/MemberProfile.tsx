@@ -62,8 +62,6 @@ const MemberProfile = () => {
 
   const TYPE_ICON = { publication: BookOpen, award: Award, event: Calendar, certificate: GraduationCap };
 
-  const [genCv, setGenCv] = useState(false);
-  const [genQr, setGenQr] = useState(false);
 
   const handleCv = async () => {
     if (!member) return;
