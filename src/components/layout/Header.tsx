@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { GraduationCap, Menu, X, LogIn, LayoutDashboard, LogOut, ShieldCheck } from "lucide-react";
+import { Menu, X, LogIn, LayoutDashboard, LogOut, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { NotificationsBell } from "@/components/NotificationsBell";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
+import logoImg from "@/assets/logo.jpeg";
 
 export const Header = () => {
   const { t } = useTranslation();
@@ -36,8 +37,8 @@ export const Header = () => {
     <header className="sticky top-0 z-50 w-full border-b border-border/60 bg-background/85 backdrop-blur-xl supports-[backdrop-filter]:bg-background/70">
       <div className="container-academic flex h-16 items-center justify-between gap-4">
         <Link to="/" className="flex items-center gap-2.5 group" aria-label="Home">
-          <div className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-primary shadow-glow transition-transform group-hover:scale-105">
-            <GraduationCap className="h-5 w-5 text-primary-foreground" />
+          <div className="relative flex h-11 w-11 items-center justify-center rounded-full overflow-hidden bg-white shadow-glow ring-1 ring-border transition-transform group-hover:scale-105">
+            <img src={logoImg} alt="شعار كلية التربية النوعية" className="h-full w-full object-contain" />
           </div>
           <div className="hidden sm:flex flex-col leading-none">
             <span className="text-base font-bold text-foreground">{t("app.name")}</span>

@@ -19,6 +19,7 @@ const roleLabel: Record<AppRole, string> = {
   super_admin: "مدير عام",
   dean: "عميد الكلية",
   professor: "هيئة تدريس",
+  assistant: "معيد",
   visitor: "زائر",
 };
 
@@ -128,7 +129,9 @@ export const UsersManager = () => {
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="visitor">{roleLabel.visitor}</SelectItem>
+                          <SelectItem value="assistant">{roleLabel.assistant}</SelectItem>
                           <SelectItem value="professor">{roleLabel.professor}</SelectItem>
+                          <SelectItem value="dean">{roleLabel.dean}</SelectItem>
                           <SelectItem value="super_admin">
                             <span className="inline-flex items-center gap-1.5">
                               <ShieldCheck className="h-3.5 w-3.5" /> {roleLabel.super_admin}
