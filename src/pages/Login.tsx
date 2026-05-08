@@ -1,7 +1,8 @@
 import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { LogIn, GraduationCap, Loader2 } from "lucide-react";
+import { LogIn, Loader2 } from "lucide-react";
+import logoImg from "@/assets/logo.jpeg";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -69,8 +70,8 @@ const Login = () => {
     <div className="container-academic py-12 md:py-16 animate-fade-in">
       <div className="max-w-md mx-auto">
         <div className="text-center mb-6">
-          <Link to="/" className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-primary shadow-glow mb-4">
-            <GraduationCap className="h-7 w-7 text-primary-foreground" />
+          <Link to="/" className="inline-flex h-16 w-16 items-center justify-center rounded-full overflow-hidden bg-white shadow-glow ring-1 ring-border mb-4">
+            <img src={logoImg} alt="شعار كلية التربية النوعية" className="h-full w-full object-contain" />
           </Link>
           <h1 className="text-2xl md:text-3xl font-extrabold mb-2">{t("auth.loginTitle")}</h1>
           <p className="text-sm text-muted-foreground">{t("auth.loginSubtitle")}</p>

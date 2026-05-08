@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { GraduationCap, Mail, MapPin, Phone } from "lucide-react";
+import { Mail, MapPin, Phone } from "lucide-react";
+import logoImg from "@/assets/logo.jpeg";
 
 export const Footer = () => {
   const { t } = useTranslation();
@@ -12,8 +13,8 @@ export const Footer = () => {
         <div className="grid gap-10 md:grid-cols-3">
           <div className="space-y-4">
             <div className="flex items-center gap-2.5">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-primary">
-                <GraduationCap className="h-5 w-5 text-primary-foreground" />
+              <div className="flex h-11 w-11 items-center justify-center rounded-full overflow-hidden bg-white ring-1 ring-border">
+                <img src={logoImg} alt="شعار كلية التربية النوعية" className="h-full w-full object-contain" />
               </div>
               <div>
                 <div className="font-bold">{t("app.name")}</div>
